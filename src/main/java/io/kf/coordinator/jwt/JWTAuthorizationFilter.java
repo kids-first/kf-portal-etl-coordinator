@@ -24,56 +24,51 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.web.filter.GenericFilterBean;
 
+import com.google.common.base.Strings;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.util.*;
 
-
 @Slf4j
 public class JWTAuthorizationFilter extends GenericFilterBean {
 
-  private final Set<String> APPROVED_ROLES = new HashSet<>(Arrays.asList("ADMIN"));
-  private final String REQUIRED_STATUS = "Approved";
+	private final Set<String> APPROVED_ROLES = new HashSet<>(Arrays.asList("ADMIN"));
+	private final String REQUIRED_STATUS = "Approved";
 
-  @Override
-  @SneakyThrows
-  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
-    val authentication = SecurityContextHolder.getContext().getAuthentication();
-    if(authentication != null) {
+	@Override
+	@SneakyThrows
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
+		val authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication != null) {
 
-      val details = (OAuth2AuthenticationDetails) authentication.getDetails();
-      val jwtDetails = (JWTDetails)details.getDecodedDetails();
+			val details = (OAuth2AuthenticationDetails) authentication.getDetails();
+			val jwtDetails = (JWTDetails) details.getDecodedDetails();
 
-      if(!validateTokenDetails(jwtDetails)) {
-        SecurityContextHolder.clearContext();
-      }
-    }
+			if (!validateTokenDetails(jwtDetails)) {
+				SecurityContextHolder.clearContext();
+			}
+		}
 
-    chain.doFilter(request, response);
-  }
+		chain.doFilter(request, response);
+	}
 
-  private boolean validateTokenDetails(@NonNull JWTDetails jwtDetails) {
-    return (validateUser(jwtDetails.getUser()) || validateApplication(jwtDetails.getApplication()));
-  }
+	private boolean validateTokenDetails(@NonNull JWTDetails jwtDetails) {
+		return (validateUser(jwtDetails.getUser()) || validateApplication(jwtDetails.getApplication()));
+	}
 
-  private boolean validateUser(Optional<JWTUser> maybeUser) {
-    // User must have User role and Approved status
+	private boolean validateUser(Optional<JWTUser> maybeUser) {
+		// User must have User role and Approved status
 
-    return maybeUser
-        .filter(
-          user ->
-            !Collections.disjoint(user.getRoles(), APPROVED_ROLES) &&
-            user.getStatus().equalsIgnoreCase(REQUIRED_STATUS)
-        )
-        .isPresent();
-  }
+		return maybeUser.filter(user -> // maintain backward compatibility
+		!Collections.disjoint(
+				(!Strings.isNullOrEmpty(user.getType())) ? Arrays.asList(user.getType()) : user.getRoles(),
+				APPROVED_ROLES) && user.getStatus().equalsIgnoreCase(REQUIRED_STATUS)).isPresent();
+	}
 
-  private boolean validateApplication(Optional<JWTApplication> maybeApp) {
-    // Application must have Approved status
-    return maybeApp
-        .filter(app -> app.getStatus().equalsIgnoreCase(REQUIRED_STATUS))
-        .isPresent();
-  }
+	private boolean validateApplication(Optional<JWTApplication> maybeApp) {
+		// Application must have Approved status
+		return maybeApp.filter(app -> app.getStatus().equalsIgnoreCase(REQUIRED_STATUS)).isPresent();
+	}
 
 }

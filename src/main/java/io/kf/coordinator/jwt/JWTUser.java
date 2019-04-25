@@ -34,5 +34,6 @@ class JWTUser {
   private String lastLogin;
   private String preferredLanguage;
   private List<String> roles;
+  private String type;
 
 }

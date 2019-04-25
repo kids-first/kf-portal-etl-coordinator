@@ -16,10 +16,16 @@
 
 package io.kf.coordinator;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import io.kf.coordinator.utils.TypeUtils;
+import lombok.val;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -30,5 +36,11 @@ public class ETLCoordinatorTaskMainTests {
     // Passes if application starts
     assert(true);
   }
+  
+	/*TODO
+	 * @Test public void coverterTest() { Map userMap = new HashMap(); val jwtUser =
+	 * TypeUtils.convertType(userMap, JWTUser.class); }
+	 */
+  
 
 }
