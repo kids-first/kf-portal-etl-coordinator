@@ -23,12 +23,11 @@ import lombok.val;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.web.filter.GenericFilterBean;
-
-import com.google.common.base.Strings;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.util.*;
+import java.util.function.Function;
 
 @Slf4j
 public class JWTAuthorizationFilter extends GenericFilterBean {
@@ -53,20 +52,36 @@ public class JWTAuthorizationFilter extends GenericFilterBean {
 		chain.doFilter(request, response);
 	}
 
-	private boolean validateTokenDetails(@NonNull JWTDetails jwtDetails) {
+	protected boolean validateTokenDetails(@NonNull JWTDetails jwtDetails) {
 		return (validateUser(jwtDetails.getUser()) || validateApplication(jwtDetails.getApplication()));
 	}
 
-	private boolean validateUser(Optional<JWTUser> maybeUser) {
+	/**
+	 * Helper method used to validate user jwt content
+	 * 
+	 * @param maybeUser input jwt user.
+	 * @return true/false
+	 */
+	protected boolean validateUser(Optional<JWTUser> maybeUser) {
 		// User must have User role and Approved status
 
-		return maybeUser.filter(user -> // maintain backward compatibility
-		!Collections.disjoint(
-				(!Strings.isNullOrEmpty(user.getType())) ? Arrays.asList(user.getType()) : user.getRoles(),
-				APPROVED_ROLES) && user.getStatus().equalsIgnoreCase(REQUIRED_STATUS)).isPresent();
+		// Check roles or type // maintain backward compatibility
+		final Function<JWTUser, Boolean> checkUserDelegate = jwtUser -> {
+			final String type = jwtUser.getType();
+			final List<String> userRoles = jwtUser.getRoles();
+			final String status = jwtUser.getStatus();
+
+			final boolean hasUserRole = (!Objects.isNull(userRoles) && !userRoles.isEmpty())
+					? !Collections.disjoint(userRoles, APPROVED_ROLES) // must be the same
+					: !Objects.isNull(type) && !Collections.disjoint(Arrays.asList(type), APPROVED_ROLES);
+
+			return hasUserRole && !Objects.isNull(status) && status.equalsIgnoreCase(REQUIRED_STATUS);
+		};
+
+		return maybeUser.filter(user -> checkUserDelegate.apply(user)).isPresent();
 	}
 
-	private boolean validateApplication(Optional<JWTApplication> maybeApp) {
+	protected boolean validateApplication(Optional<JWTApplication> maybeApp) {
 		// Application must have Approved status
 		return maybeApp.filter(app -> app.getStatus().equalsIgnoreCase(REQUIRED_STATUS)).isPresent();
 	}
