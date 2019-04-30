@@ -34,116 +34,116 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class JWTAuthorizationFilterTest {
 
-	private JWTAuthorizationFilter jWTAuthorizationFilter;
+  private JWTAuthorizationFilter jWTAuthorizationFilter;
 
-	@Before
-	public void setUp() throws Exception {
-		jWTAuthorizationFilter = Mockito.spy(new JWTAuthorizationFilter());
-	}
+  @Before
+  public void setUp() throws Exception {
+    jWTAuthorizationFilter = Mockito.spy(new JWTAuthorizationFilter());
+  }
 
-	@Test
-	public void shouldPassOnStatusApprovedAndRole() {
-		// Given
-		JWTUser user = new JWTUser();
-		user.setType(null);
-		user.setRoles(Arrays.asList("ADMIN"));
-		user.setStatus("Approved");
+  @Test
+  public void shouldPassOnStatusApprovedAndRole() {
+    // Given
+    JWTUser user = new JWTUser();
+    user.setType(null);
+    user.setRoles(Arrays.asList("ADMIN"));
+    user.setStatus("Approved");
 
-		// When
-		boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
+    // When
+    boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
 
-		// Then
-		assertThat("User valid on role and status", userValidated, CoreMatchers.is(true));
-	}
+    // Then
+    assertThat("User valid on role and status", userValidated, CoreMatchers.is(true));
+  }
 
-	@Test
-	public void shouldFailOnStatusNotApprovedAndRole() {
-		// Given
-		JWTUser user = new JWTUser();
-		user.setType(null);
-		user.setRoles(Arrays.asList("ADMIN"));
-		user.setStatus("NotApproved");
+  @Test
+  public void shouldFailOnStatusNotApprovedAndRole() {
+    // Given
+    JWTUser user = new JWTUser();
+    user.setType(null);
+    user.setRoles(Arrays.asList("ADMIN"));
+    user.setStatus("NotApproved");
 
-		// When
-		boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
+    // When
+    boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
 
-		// Then
-		assertThat("User NOT valid on role and status", userValidated, CoreMatchers.is(false));
-	}
+    // Then
+    assertThat("User NOT valid on role and status", userValidated, CoreMatchers.is(false));
+  }
 
-	@Test
-	public void shouldPassOnStatusApprovedAndType() {
-		// Given
-		JWTUser user = new JWTUser();
-		user.setType("ADMIN");
-		user.setRoles(null);
-		user.setStatus("Approved");
+  @Test
+  public void shouldPassOnStatusApprovedAndType() {
+    // Given
+    JWTUser user = new JWTUser();
+    user.setType("ADMIN");
+    user.setRoles(null);
+    user.setStatus("Approved");
 
-		// When
-		boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
+    // When
+    boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
 
-		// Then
-		assertThat("User valid on type and status", userValidated, CoreMatchers.is(true));
-	}
+    // Then
+    assertThat("User valid on type and status", userValidated, CoreMatchers.is(true));
+  }
 
-	@Test
-	public void shouldFailOnStatusNotApprovedAndType() {
-		// Given
-		JWTUser user = new JWTUser();
-		user.setType("ADMIN");
-		user.setRoles(null);
-		user.setStatus("NotApproved");
+  @Test
+  public void shouldFailOnStatusNotApprovedAndType() {
+    // Given
+    JWTUser user = new JWTUser();
+    user.setType("ADMIN");
+    user.setRoles(null);
+    user.setStatus("NotApproved");
 
-		// When
-		boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
+    // When
+    boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
 
-		// Then
-		assertThat("User NOT valid on type and status", userValidated, CoreMatchers.is(false));
-	}
+    // Then
+    assertThat("User NOT valid on type and status", userValidated, CoreMatchers.is(false));
+  }
 
-	@Test
-	public void shouldFailOnNoTypeNoRole() {
-		// Given
-		JWTUser user = new JWTUser();
-		user.setType(null);
-		user.setRoles(null);
-		user.setStatus("Approved");
+  @Test
+  public void shouldFailOnNoTypeNoRole() {
+    // Given
+    JWTUser user = new JWTUser();
+    user.setType(null);
+    user.setRoles(null);
+    user.setStatus("Approved");
 
-		// When
-		boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
+    // When
+    boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
 
-		// Then
-		assertThat("User NOT valid on NO type No role", userValidated, CoreMatchers.is(false));
-	}
+    // Then
+    assertThat("User NOT valid on NO type No role", userValidated, CoreMatchers.is(false));
+  }
 
-	@Test
-	public void shouldPassOnTypeAndRoleFirst() {
-		// Given
-		JWTUser user = new JWTUser();
-		user.setType("ADMIN");
-		user.setRoles(Arrays.asList("ADMIN"));
-		user.setStatus("Approved");
+  @Test
+  public void shouldPassOnTypeAndRoleFirst() {
+    // Given
+    JWTUser user = new JWTUser();
+    user.setType("ADMIN");
+    user.setRoles(Arrays.asList("ADMIN"));
+    user.setStatus("Approved");
 
-		// When
-		boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
+    // When
+    boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
 
-		// Then
-		assertThat("User valid on type and role first", userValidated, CoreMatchers.is(true));
-	}
+    // Then
+    assertThat("User valid on type and role first", userValidated, CoreMatchers.is(true));
+  }
 
-	@Test
-	public void shouldFailOnStatusNotApprovedAndNoTypeNoRole() {
-		// Given
-		JWTUser user = new JWTUser();
-		user.setType(null);
-		user.setRoles(null);
-		user.setStatus("NotApproved");
+  @Test
+  public void shouldFailOnStatusNotApprovedAndNoTypeNoRole() {
+    // Given
+    JWTUser user = new JWTUser();
+    user.setType(null);
+    user.setRoles(null);
+    user.setStatus("NotApproved");
 
-		// When
-		boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
+    // When
+    boolean userValidated = jWTAuthorizationFilter.validateUser(Optional.of(user));
 
-		// Then
-		assertThat("User NOT valid on NO type No role not approved", userValidated, CoreMatchers.is(false));
-	}
+    // Then
+    assertThat("User NOT valid on NO type No role not approved", userValidated, CoreMatchers.is(false));
+  }
 
 }

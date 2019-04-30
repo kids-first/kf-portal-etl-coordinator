@@ -42,69 +42,69 @@ import lombok.val;
 @SuppressWarnings("rawtypes")
 public class JWTTokenConverterTest {
 
-	@Test
-	public void shouldPassWhenAuthenticationMapProvided() {
-		try {
-			// Given
-			JWTTokenConverter converter = Mockito.spy(new JWTTokenConverter("key"));
-			final Map<String, ?> userMap = Collections.singletonMap("context",
-					Collections.singletonMap("user", Collections.singletonMap("type", "ADMIN")));
-			// When
-			OAuth2Authentication oAuthUser = converter.extractAuthentication(userMap);
+  @Test
+  public void shouldPassWhenAuthenticationMapProvided() {
+    try {
+      // Given
+      JWTTokenConverter converter = Mockito.spy(new JWTTokenConverter("key"));
+      final Map<String, ?> userMap = Collections.singletonMap("context",
+          Collections.singletonMap("user", Collections.singletonMap("type", "ADMIN")));
+      // When
+      OAuth2Authentication oAuthUser = converter.extractAuthentication(userMap);
 
-			// Then
-			assertThat("Auth user info is populated", oAuthUser.getDetails(), CoreMatchers.notNullValue());
-		} catch (Exception nested) {
-			assertThat("abstract super classe error occured", nested, CoreMatchers.notNullValue());
-		}
-	}
+      // Then
+      assertThat("Auth user info is populated", oAuthUser.getDetails(), CoreMatchers.notNullValue());
+    } catch (Exception nested) {
+      assertThat("abstract super classe error occured", nested, CoreMatchers.notNullValue());
+    }
+  }
 
-	@Test
-	public void shouldPassWhenRolesProvided() {
-		// Given
-		final Map userMap = Collections.singletonMap("roles", Arrays.asList("USER"));
+  @Test
+  public void shouldPassWhenRolesProvided() {
+    // Given
+    final Map userMap = Collections.singletonMap("roles", Arrays.asList("USER"));
 
-		// When
-		val jwtUser = TypeUtils.convertType(userMap, JWTUser.class);
+    // When
+    val jwtUser = TypeUtils.convertType(userMap, JWTUser.class);
 
-		// Then
-		assertThat("Roles is populated", jwtUser.getRoles(), CoreMatchers.hasItem("USER"));
-	}
+    // Then
+    assertThat("Roles is populated", jwtUser.getRoles(), CoreMatchers.hasItem("USER"));
+  }
 
-	@Test
-	public void shouldPassWhenRolesNotProvided() {
-		// Given
-		final Map userMap = Collections.singletonMap("unknown", "dummy");
+  @Test
+  public void shouldPassWhenRolesNotProvided() {
+    // Given
+    final Map userMap = Collections.singletonMap("unknown", "dummy");
 
-		// When
-		val jwtUser = TypeUtils.convertType(userMap, JWTUser.class);
+    // When
+    val jwtUser = TypeUtils.convertType(userMap, JWTUser.class);
 
-		// Then
-		assertThat("Roles is not provided", jwtUser.getRoles(), CoreMatchers.equalTo(null));
-	}
+    // Then
+    assertThat("Roles is not provided", jwtUser.getRoles(), CoreMatchers.equalTo(null));
+  }
 
-	@Test
-	public void shouldPassWhenTypeNotProvided() {
-		// Given
-		final Map userMap = Collections.singletonMap("anyThing", "dummy");
+  @Test
+  public void shouldPassWhenTypeNotProvided() {
+    // Given
+    final Map userMap = Collections.singletonMap("anyThing", "dummy");
 
-		// When
-		val jwtUser = TypeUtils.convertType(userMap, JWTUser.class);
+    // When
+    val jwtUser = TypeUtils.convertType(userMap, JWTUser.class);
 
-		// Then
-		assertThat("Type is not provided", jwtUser.getType(), CoreMatchers.equalTo(null));
-	}
+    // Then
+    assertThat("Type is not provided", jwtUser.getType(), CoreMatchers.equalTo(null));
+  }
 
-	@Test
-	public void shouldPassWhenTypeProvided() {
-		// Given
-		final Map userMap = Collections.singletonMap("type", "Admin");
+  @Test
+  public void shouldPassWhenTypeProvided() {
+    // Given
+    final Map userMap = Collections.singletonMap("type", "Admin");
 
-		// When
-		val jwtUser = TypeUtils.convertType(userMap, JWTUser.class);
+    // When
+    val jwtUser = TypeUtils.convertType(userMap, JWTUser.class);
 
-		// Then
-		assertThat("Type is provided", jwtUser.getType(), CoreMatchers.containsString("Admin"));
-	}
+    // Then
+    assertThat("Type is provided", jwtUser.getType(), CoreMatchers.containsString("Admin"));
+  }
 
 }

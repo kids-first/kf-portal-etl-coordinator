@@ -32,58 +32,58 @@ import java.util.function.Function;
 @Slf4j
 public class JWTAuthorizationFilter extends GenericFilterBean {
 
-	private final Set<String> APPROVED_ROLES = new HashSet<>(Arrays.asList("ADMIN"));
-	private final String REQUIRED_STATUS = "Approved";
+  private final Set<String> APPROVED_ROLES = new HashSet<>(Arrays.asList("ADMIN"));
+  private final String REQUIRED_STATUS = "Approved";
 
-	@Override
-	@SneakyThrows
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
-		val authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication != null) {
+  @Override
+  @SneakyThrows
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
+    val authentication = SecurityContextHolder.getContext().getAuthentication();
+    if (authentication != null) {
 
-			val details = (OAuth2AuthenticationDetails) authentication.getDetails();
-			val jwtDetails = (JWTDetails) details.getDecodedDetails();
+      val details = (OAuth2AuthenticationDetails) authentication.getDetails();
+      val jwtDetails = (JWTDetails) details.getDecodedDetails();
 
-			if (!validateTokenDetails(jwtDetails)) {
-				SecurityContextHolder.clearContext();
-			}
-		}
+      if (!validateTokenDetails(jwtDetails)) {
+        SecurityContextHolder.clearContext();
+      }
+    }
 
-		chain.doFilter(request, response);
-	}
+    chain.doFilter(request, response);
+  }
 
-	protected boolean validateTokenDetails(@NonNull JWTDetails jwtDetails) {
-		return (validateUser(jwtDetails.getUser()) || validateApplication(jwtDetails.getApplication()));
-	}
+  protected boolean validateTokenDetails(@NonNull JWTDetails jwtDetails) {
+    return (validateUser(jwtDetails.getUser()) || validateApplication(jwtDetails.getApplication()));
+  }
 
-	/**
-	 * Helper method used to validate user jwt content
-	 * 
-	 * @param maybeUser input jwt user.
-	 * @return true/false
-	 */
-	protected boolean validateUser(Optional<JWTUser> maybeUser) {
-		// User must have User role and Approved status
+  /**
+   * Helper method used to validate user jwt content
+   * 
+   * @param maybeUser input jwt user.
+   * @return true/false
+   */
+  protected boolean validateUser(Optional<JWTUser> maybeUser) {
+    // User must have User role and Approved status
 
-		// Check roles or type // maintain backward compatibility
-		final Function<JWTUser, Boolean> checkUserDelegate = jwtUser -> {
-			final String type = jwtUser.getType();
-			final List<String> userRoles = jwtUser.getRoles();
-			final String status = jwtUser.getStatus();
+    // Check roles or type // maintain backward compatibility
+    final Function<JWTUser, Boolean> checkUserDelegate = jwtUser -> {
+      final String type = jwtUser.getType();
+      final List<String> userRoles = jwtUser.getRoles();
+      final String status = jwtUser.getStatus();
 
-			final boolean hasUserRole = (!Objects.isNull(userRoles) && !userRoles.isEmpty())
-					? !Collections.disjoint(userRoles, APPROVED_ROLES) // must be the same
-					: !Objects.isNull(type) && !Collections.disjoint(Arrays.asList(type), APPROVED_ROLES);
+      final boolean hasUserRole = (!Objects.isNull(userRoles) && !userRoles.isEmpty())
+          ? !Collections.disjoint(userRoles, APPROVED_ROLES) // must be the same
+          : !Objects.isNull(type) && !Collections.disjoint(Arrays.asList(type), APPROVED_ROLES);
 
-			return hasUserRole && !Objects.isNull(status) && status.equalsIgnoreCase(REQUIRED_STATUS);
-		};
+      return hasUserRole && !Objects.isNull(status) && status.equalsIgnoreCase(REQUIRED_STATUS);
+    };
 
-		return maybeUser.filter(user -> checkUserDelegate.apply(user)).isPresent();
-	}
+    return maybeUser.filter(user -> checkUserDelegate.apply(user)).isPresent();
+  }
 
-	protected boolean validateApplication(Optional<JWTApplication> maybeApp) {
-		// Application must have Approved status
-		return maybeApp.filter(app -> app.getStatus().equalsIgnoreCase(REQUIRED_STATUS)).isPresent();
-	}
+  protected boolean validateApplication(Optional<JWTApplication> maybeApp) {
+    // Application must have Approved status
+    return maybeApp.filter(app -> app.getStatus().equalsIgnoreCase(REQUIRED_STATUS)).isPresent();
+  }
 
 }
