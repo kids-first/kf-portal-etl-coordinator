@@ -26,57 +26,75 @@ import static io.kf.coordinator.task.fsm.states.TaskFSMStates.PUBLISHING;
 @RestController
 public class ETLCoordinatorTaskController {
 
-  private String STATUS_READY = "ready for work";
-  private String STATUS_UNAVAILABLE = "service unavailable";
+    private final ETLTaskManager clinicalEtlTaskManager;
 
-  @Autowired
-  private ETLTaskManager taskManager;
+    private final ETLTaskManager pdfEtlTaskManager;
 
-  @GetMapping(path = "/status")
-  @Produces("application/json")
-  public @ResponseBody
-  StatusDTO status() {
-    return StatusDTO.builder()
-        //TODO: Logic to check if service is available
-        .message(STATUS_READY)
-        .build();
-  }
-
-  @PostMapping(path = "/tasks")
-  @Consumes("application/json")
-  @Produces("application/json")
-  public @ResponseBody
-  TasksDTO tasks(
-      @RequestBody(required = true) TasksRequest request,
-      @RequestHeader(value = AUTHORIZATION, defaultValue = "") String accessToken
-  ) {
-
-    taskManager.dispatch(
-        AuthorizedTaskRequest.builder()
-            .task_id(request.getTask_id())
-            .release_id(request.getRelease_id())
-            .action(request.getAction())
-            .accessToken(accessToken)
-            .build());
-
-    // TODO: Handle task == null case
-    val task = taskManager.getTask(request.getTask_id());
-
-    // Temporary hack - publish action should return "Publishing" not "Published"
-    // Release coordinator cannot handle the staged->published transition, need to make them sync up by passing "PUBLISHING"
-    // The actual "PUBLISHED" state will be retrieved by their query.
-    // TODO: Remove this hack. Potentially run the publish service asynchronously
-    TaskFSMStates state = task.getState();
-    if (request.getAction().equals(TaskAction.publish) && state.equals(PUBLISHED)) {
-      state = PUBLISHING;
+    @Autowired
+    public ETLCoordinatorTaskController(ETLTaskManager clinicalEtlTaskManager, ETLTaskManager pdfEtlTaskManager) {
+        this.clinicalEtlTaskManager = clinicalEtlTaskManager;
+        this.pdfEtlTaskManager = pdfEtlTaskManager;
     }
 
-    return TasksDTO.builder()
-        .task_id(request.getTask_id())
-        .release_id(task.getRelease())
-        .state(state)
-        .progress(task.getProgress())
-        .build();
-  }
+    @GetMapping(path = "/status")
+    @Produces("application/json")
+    public @ResponseBody
+    StatusDTO status() {
+        return StatusDTO.builder()
+                //TODO: Logic to check if service is available
+                .message("ready for work")
+                .build();
+    }
+
+    @PostMapping(path = "/tasks")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public @ResponseBody
+    TasksDTO clinicalTasks(
+            @RequestBody() TasksRequest request,
+            @RequestHeader(value = AUTHORIZATION, defaultValue = "") String accessToken
+    ) {
+        return process(clinicalEtlTaskManager, request, accessToken);
+    }
+
+    @PostMapping(path = "/pdf/tasks")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public @ResponseBody
+    TasksDTO pdfTasks(
+            @RequestBody() TasksRequest request,
+            @RequestHeader(value = AUTHORIZATION, defaultValue = "") String accessToken
+    ) {
+        return process(pdfEtlTaskManager, request, accessToken);
+    }
+
+    private TasksDTO process(ETLTaskManager taskManager, TasksRequest request, String accessToken) {
+        taskManager.dispatch(
+                AuthorizedTaskRequest.builder()
+                        .task_id(request.getTask_id())
+                        .release_id(request.getRelease_id())
+                        .action(request.getAction())
+                        .accessToken(accessToken)
+                        .build());
+
+        // TODO: Handle task == null case
+        val task = taskManager.getTask(request.getTask_id());
+
+        // Temporary hack - publish action should return "Publishing" not "Published"
+        // Release coordinator cannot handle the staged->published transition, need to make them sync up by passing "PUBLISHING"
+        // The actual "PUBLISHED" state will be retrieved by their query.
+        // TODO: Remove this hack. Potentially run the publish service asynchronously
+        TaskFSMStates state = task.getState();
+        if (request.getAction().equals(TaskAction.publish) && state.equals(PUBLISHED)) {
+            state = PUBLISHING;
+        }
+
+        return TasksDTO.builder()
+                .task_id(request.getTask_id())
+                .release_id(task.getRelease())
+                .state(state)
+                .progress(task.getProgress())
+                .build();
+    }
 
 }
