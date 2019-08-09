@@ -40,17 +40,19 @@ public class ETLTask extends Task {
    */
   private final ETLDockerContainer etl;
   private final PublishService publishService;
+  private final Set<String> aliases;
 
   public ETLTask(@NonNull ETLDockerContainer etl,
-      @NonNull PublishService publishService,
-      @NonNull String id,
-      @NonNull String release,
-      @NonNull Set<String> studies) throws Exception {
+                 @NonNull PublishService publishService,
+                 @NonNull String id,
+                 @NonNull String release,
+                 @NonNull Set<String> studies, Set<String> aliases) throws Exception {
     super(id, release);
     this.etl = etl;
     this.studies = studies;
     this.displayName = format("ETL Task [%s]", id);
     this.publishService = publishService;
+    this.aliases = aliases;
   }
 
   //TODO: sanitize studyIds and release at instantiation phase and if not good, put in REJECT state
@@ -145,7 +147,7 @@ public class ETLTask extends Task {
     sendEvent(PUBLISH, new EventCallback() {
 
       @Override public void onRun() throws Throwable {
-        publishService.publishRelease(accessToken , getRelease(), getStudies());
+        publishService.publishRelease(accessToken , getRelease(), getStudies(), aliases);
         sendEvent(PUBLISHING_DONE);
         log.info("{} -> PUBLISHED.", getDisplayName());
         log.info("{} Cleaning up....", getDisplayName());

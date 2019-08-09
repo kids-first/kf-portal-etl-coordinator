@@ -9,6 +9,10 @@ import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+
 @Configuration
 public class ETLTaskManagerConfig {
 
@@ -20,12 +24,12 @@ public class ETLTaskManagerConfig {
 
     @Bean
     public ETLTaskManager clinicalEtlTaskManager(ReleaseService releaseService, PublishService publishService, ClinicalDockerContainerConfig clinicalDockerContainerConfig, DockerClient docker) {
-        return new ETLTaskManager(releaseService, publishService, clinicalDockerContainerConfig, docker);
+        return new ETLTaskManager(releaseService, publishService, clinicalDockerContainerConfig, docker, new HashSet<>(Arrays.asList("participant_centric", "file_centric")));
     }
 
     @Bean
     public ETLTaskManager pdfEtlTaskManager(ReleaseService releaseService, PublishService publishService, PdfDockerContainerConfig pdfDockerContainerConfig, DockerClient docker) {
-        return new ETLTaskManager(releaseService, publishService, pdfDockerContainerConfig, docker);
+        return new ETLTaskManager(releaseService, publishService, pdfDockerContainerConfig, docker, new HashSet<>(Collections.singletonList("quicksearch")));
     }
 
 
