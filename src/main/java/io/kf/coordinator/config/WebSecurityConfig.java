@@ -41,7 +41,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   @SneakyThrows
   public void configure(HttpSecurity http) {
-    http.authorizeRequests().anyRequest().permitAll();
+    http
+            .csrf().disable()
+            .authorizeRequests().anyRequest().permitAll();
   }
 
 //  public void configure(HttpSecurity http) {
