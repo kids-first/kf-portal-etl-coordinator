@@ -46,7 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .forRS256(audience, issuer)
             .configure(http)
             .authorizeRequests()
-            .antMatchers("/swagger**", "/swagger-resources/**", "/v2/api**", "/webjars/**").permitAll()
+            .antMatchers("/swagger**", "/swagger-resources/**", "/v2/api**", "/webjars/**", "/status").permitAll()
             .and()
             .authorizeRequests()
             .antMatchers(HttpMethod.POST).authenticated()
