@@ -41,26 +41,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   @SneakyThrows
   public void configure(HttpSecurity http) {
-    http
-            .csrf().disable()
-            .authorizeRequests().anyRequest().permitAll();
-  }
+    JwtWebSecurityConfigurer
+            .forRS256(audience, issuer)
+            .configure(http)
+            .authorizeRequests()
+            .antMatchers("/swagger**", "/swagger-resources/**", "/v2/api**", "/webjars/**").permitAll()
+            .and()
+            .authorizeRequests()
+            .antMatchers(HttpMethod.POST).authenticated()
+            .and()
+            .authorizeRequests()
+            .anyRequest().authenticated()
+            .and()
+            .addFilterAfter(new JWTAuthorizationFilter(), BasicAuthenticationFilter.class);
 
-//  public void configure(HttpSecurity http) {
-//    JwtWebSecurityConfigurer
-//            .forRS256(audience, issuer)
-//            .configure(http)
-//            .authorizeRequests()
-//            .antMatchers("/swagger**", "/swagger-resources/**", "/v2/api**", "/webjars/**").permitAll()
-//            .and()
-//            .authorizeRequests()
-//            .antMatchers(HttpMethod.POST).authenticated()
-//            .and()
-//            .authorizeRequests()
-//            .anyRequest().authenticated()
-//            .and()
-//            .addFilterAfter(new JWTAuthorizationFilter(), BasicAuthenticationFilter.class);
-//
-//  }
+  }
 
 }
