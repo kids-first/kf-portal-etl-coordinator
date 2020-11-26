@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -32,7 +33,6 @@ public abstract class TaskManager {
     val releaseId = request.getRelease_id();
     val action = request.getAction();
     val accessToken = request.getAccessToken();
-
     switch(action) {
 
       case get_status:
@@ -42,7 +42,8 @@ public abstract class TaskManager {
       case initialize:
         log.debug("{} Initialize action for {}", ETL_MANAGER, request.getTask_id());
         try{
-          val task = registerTask(accessToken, taskId, releaseId);
+          val studies = request.getStudies();
+          val task = registerTask(accessToken, taskId, releaseId, studies);
           task.handleAction(action, accessToken);
         } catch (Throwable t){
           log.error("{} Failed to initialize task request {}: [{}] -> {}",
@@ -98,9 +99,9 @@ public abstract class TaskManager {
    * If the task does not exist, create it and register it. If it does, ensure the important bits of information in the task request by the user matches what is persisted/stored in the manager, and just return that
    * @throws TaskManagerException if task exists but does not match some of the data stored, or if the newly created task is null
    */
-  private Task registerTask(String accessToken, String taskId, String releaseId){
+  private Task registerTask(String accessToken, String taskId, String releaseId, List<String> studies){
     val existingTaskResult = findTask(taskId);
-    val newTask = createTask(accessToken, taskId, releaseId);
+    val newTask = createTask(accessToken, taskId, releaseId, studies);
     Task task;
     if (existingTaskResult.isPresent()){
       val existingTask = existingTaskResult.get();
@@ -115,6 +116,6 @@ public abstract class TaskManager {
     return task;
   }
 
-  protected abstract Task createTask(String accessToken, String taskId, String releaseId) throws TaskException;
+  protected abstract Task createTask(String accessToken, String taskId, String releaseId, List<String> studies) throws TaskException;
 
 }
