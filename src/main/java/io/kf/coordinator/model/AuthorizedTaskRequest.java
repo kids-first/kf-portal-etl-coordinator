@@ -5,14 +5,16 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+import java.util.List;
+
 @Value
 @Builder
 public class AuthorizedTaskRequest {
-  @NonNull private TaskAction action;
-
-  @NonNull private String task_id;
-
-  private String release_id;
-
-  private String accessToken;
+    @NonNull
+    TaskAction action;
+    @NonNull
+    String task_id;
+    String release_id;
+    String accessToken;
+    List<String> studies;
 }
