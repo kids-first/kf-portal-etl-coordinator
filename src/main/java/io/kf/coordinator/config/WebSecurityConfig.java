@@ -38,11 +38,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Value("${auth0.issuer}")
   private String issuer;
+
   @Override
   @SneakyThrows
   public void configure(HttpSecurity http) {
+    String[] audienceSplit = issuer.split(",");
+
     JwtWebSecurityConfigurer
-            .forRS256(audience, issuer)
+            .forRS256(audienceSplit[0].trim(), issuer)
             .configure(http)
             .authorizeRequests()
             .antMatchers("/swagger**", "/swagger-resources/**", "/v2/api**", "/webjars/**").permitAll()
@@ -55,6 +58,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
             .addFilterAfter(new JWTAuthorizationFilter(), BasicAuthenticationFilter.class);
 
+    if (audienceSplit.length == 2){
+      JwtWebSecurityConfigurer
+              .forRS256(audienceSplit[1].trim(), issuer)
+              .configure(http)
+              .authorizeRequests()
+              .antMatchers("/swagger**", "/swagger-resources/**", "/v2/api**", "/webjars/**").permitAll()
+              .and()
+              .authorizeRequests()
+              .antMatchers(HttpMethod.POST).authenticated()
+              .and()
+              .authorizeRequests()
+              .anyRequest().authenticated()
+              .and()
+              .addFilterAfter(new JWTAuthorizationFilter(), BasicAuthenticationFilter.class);
+    }
   }
-
 }
