@@ -42,7 +42,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   @SneakyThrows
   public void configure(HttpSecurity http) {
-    String[] audienceSplit = issuer.split(",");
+    String[] audienceSplit = audience.split(",");
 
     JwtWebSecurityConfigurer
             .forRS256(audienceSplit[0].trim(), issuer)
