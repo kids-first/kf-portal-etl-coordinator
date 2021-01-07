@@ -52,12 +52,13 @@ public class ETLCoordinatorTaskController {
   ) {
 
     taskManager.dispatch(
-        AuthorizedTaskRequest.builder()
-            .task_id(request.getTask_id())
-            .release_id(request.getRelease_id())
-            .action(request.getAction())
-            .accessToken(accessToken)
-            .build());
+            AuthorizedTaskRequest.builder()
+                    .task_id(request.getTask_id())
+                    .release_id(request.getRelease_id())
+                    .action(request.getAction())
+                    .accessToken(accessToken)
+                    .studies(request.getStudies())
+                    .build());
 
     // TODO: Handle task == null case
     val task = taskManager.getTask(request.getTask_id());

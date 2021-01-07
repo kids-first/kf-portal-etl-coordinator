@@ -42,6 +42,7 @@ public abstract class TaskManager {
       case initialize:
         log.debug("{} Initialize action for {}", ETL_MANAGER, request.getTask_id());
         try{
+          log.debug("{} - the request", request);
           val studies = request.getStudies();
           val task = registerTask(accessToken, taskId, releaseId, studies);
           task.handleAction(action, accessToken);

@@ -7,17 +7,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TasksRequest {
-
   private TaskAction action;
-
   private String task_id;
-
   private String release_id;
-
+  private List<String> studies;
 }
