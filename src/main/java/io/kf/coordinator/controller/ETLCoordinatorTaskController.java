@@ -15,14 +15,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
+
+import java.util.List;
 
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 import static io.kf.coordinator.task.fsm.states.TaskFSMStates.PUBLISHED;
 import static io.kf.coordinator.task.fsm.states.TaskFSMStates.PUBLISHING;
 
+@Slf4j
 @RestController
 public class ETLCoordinatorTaskController {
 
@@ -50,6 +54,14 @@ public class ETLCoordinatorTaskController {
       @RequestBody(required = true) TasksRequest request,
       @RequestHeader(value = AUTHORIZATION, defaultValue = "") String accessToken
   ) {
+
+    log.info(
+            "Got a new task. Id = {}, action = {}, release_id = {}, studies = {}",
+            request.getTask_id(),
+            request.getAction(),
+            request.getRelease_id(),
+            request.getStudies()
+    );
 
     taskManager.dispatch(
             AuthorizedTaskRequest.builder()
